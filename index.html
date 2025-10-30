@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mafior's Custom Hub</title>
+  <style>
+    /* Exact same CSS as original - no changes */
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding-top: 120px;
+      font-family: Arial, sans-serif;
+      background-color: #ffe6f0;
+      color: #333333;
+    }
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 5%;
+      box-sizing: border-box;
+      z-index: 999;
+      border-bottom: 2px solid #D81B60;
+    }
+    .nav-left-links {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .nav-link-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border: 1px solid #ffcce0;
+        border-radius: 5px;
+        background: #fdfdff;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-height: 40px;
+        touch-action: manipulation;
+    }
+    .nav-link-box:hover { background-color: #ffebf5; }
+    .nav-link-box img { width: 18px; height: 18px; margin-right: 6px; border-radius: 3px; object-fit: contain; }
+    .nav-link-box .dots {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        font-size: 18px;
+        cursor: pointer;
+        color: #D81B60;
+        z-index: 10;
+        padding: 5px;
+    }
+    .nav-link-box.add-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #D81B60;
+        cursor: pointer;
+        min-width: 40px;
+        min-height: 40px;
+    }
+    .nav-link-inner {
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        width: 100%;
+    }
+    .nav-right-projects {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .nav-project-highlight {
+        display: flex;
+        align-items: center;
+        color: #D81B60;
+        margin: 0 10px;
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    .nav-project-highlight img { width: 18px; height: 18px; margin-right: 5px; border-radius: 4px; }
+    .mafia-btn {
+        background-color: #D81B60;
+        color: white;
+        text-decoration: none;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 12px;
+        transition: background-color 0.3s;
+        white-space: nowrap;
+        flex-shrink: 0;
+        min-height: 36px;
+        touch-action: manipulation;
+    }
+    .mafia-btn:hover { background-color: #A00037; }
+    .projects-menu-container { display: inline-block; z-index: 50; }
+    #projects-btn {
+        display: flex;
+        align-items: center;
+        background-color: #FFC107;
+        color: #333;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        min-height: 36px;
+    }
+    #projects-btn:hover { background-color: #FFEB3B; }
+    .projects-icon { display: inline-block; width: 30px; height: 40px; vertical-align: middle; margin-right: 5px; }
+    .projects-icon svg { width: 100%; height: 100%; }
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 10px;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #ffb3d9;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: none;
+        min-width: 300px;
+        z-index: 60;
+    }
+    .projects-grid .link-box {
+        background: #fdfdff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
+        min-height: 90px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        touch-action: manipulation;
+    }
+    .projects-grid .link-box a {
+        text-decoration: none;
+        color: #333;
+        font-size: 13px;
+        display: block;
+        width: 100%;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        word-break: break-word;
+        margin-top: 5px;
+    }
+    .projects-grid .link-box img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+        border-radius: 4px;
+        margin-bottom: 5px;
+        background-color: #f0f0f0;
+    }
+    .projects-grid .link-box:hover { background-color: #ffebf5; }
+    .projects-grid .link-box.no-dots .dots { display: none; }
+    .page-wrapper { width: 95%; max-width: 1200px; margin-bottom: 40px; }
+    .main-heading {
+      font-size: 60px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 8px #D81B60, 0 0 16px #D81B60, 0 0 32px #FF4081, 0 0 64px #FF80AB;
+      margin: 40px auto;
+      text-align: center;
+      letter-spacing: 3px;
+      transition: all 0.5s;
+    }
+    .main-heading:hover {
+        transform: scale(1.03);
+        text-shadow: 0 0 12px #D81B60, 0 0 24px #D81B60, 0 0 48px #FF4081, 0 0 80px #FF80AB;
+    }
+    .main-content { display: flex; flex-direction: row; width: 100%; gap: 20px; }
+    .links-portion, .search-portion { flex: 1; max-width: 50%; min-width: 0; }
+    .second-links-portion { max-width: 100%; min-width: 0; margin-top: 20px; }
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #ffb3d9;
+    }
+    .links-grid#second-links-grid { grid-template-columns: repeat(6, 1fr); }
+    .link-box {
+      background: #fdfdff;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      touch-action: manipulation;
+    }
+    .link-box a {
+      text-decoration: none;
+      color: #333;
+      font-size: 13px;
+      display: block;
+      width: 100%;
+      white-space: normal;
+      overflow: visible;
+      text-overflow: unset;
+      word-break: break-word;
+      margin-top: 5px;
+    }
+    .link-box .favicon-img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+        border-radius: 4px;
+        margin-bottom: 5px;
+        background-color: #f0f0f0;
+    }
+    .link-box .dots {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #D81B60;
+      z-index: 10;
+      padding: 5px;
+    }
+    .add-box {
+        background-color: #f7f7f7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #D81B60;
+        cursor: pointer;
+        min-height: 90px;
+    }
+    .search-engines-list { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
+    .search-group { display: flex; flex-direction: column; gap: 5px; }
+    .search-form {
+      display: flex;
+      width: 100%;
+      border: 1px solid #ffb3d9;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      background-color: #ffffff;
+    }
+    .search-input {
+      flex-grow: 1;
+      padding: 10px 15px;
+      border: none;
+      font-size: 14px;
+      outline: none;
+      color: #333;
+    }
+    .search-button {
+      padding: 10px 15px;
+      border: none;
+      background-color: #D81B60;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: bold;
+      min-width: 80px;
+    }
+    .search-button:hover { background-color: #A00037; }
+    .search-label { font-weight: bold; color: #D81B60; font-size: 14px; }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .modal-content h3 { margin: 0 0 15px; font-size: 18px; color: #D81B60; }
+    .modal-content label { display: block; margin: 10px 0 5px; font-size: 14px; }
+    .modal-content input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
+    .modal-buttons button { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    #save-btn { background-color: #D81B60; color: white; }
+    #save-btn:hover { background-color: #A00037; }
+    #cancel-btn { background-color: #ccc; color: #333; }
+    #cancel-btn:hover { background-color: #bbb; }
+    .action-menu {
+      position: fixed;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+      z-index: 1001;
+      min-width: 120px;
+    }
+    .action-menu button {
+      display: block;
+      width: 100%;
+      padding: 8px 15px;
+      border: none;
+      background: none;
+      text-align: left;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .action-menu button:hover { background-color: #f0f0f0; color: #D81B60; }
+    /* Mobile Responsive - Exact same as original */
+    @media (max-width: 768px) {
+        body { padding-top: 140px; }
+        .main-content { flex-direction: column; }
+        .links-portion, .search-portion { max-width: 100%; }
+        .second-links-portion { max-width: 100%; }
+        .main-heading { font-size: 40px; margin: 30px auto; letter-spacing: 2px; }
+        .page-wrapper { width: 98%; }
+        .links-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .links-grid#second-links-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .link-box { min-height: 80px; }
+        .link-box a { font-size: 11px; }
+        .link-box .favicon-img { width: 24px; height: 24px; }
+        .add-box { min-height: 80px; font-size: 20px; }
+        .nav-link-box { padding: 6px 10px; font-size: 13px; min-height: 36px; }
+        .nav-link-box img { width: 16px; height: 16px; }
+        .nav-link-box.add-box { min-width: 36px; min-height: 36px; font-size: 20px; }
+        .mafia-btn { font-size: 11px; padding: 6px 10px; min-height: 32px; }
+        .nav-project-highlight { font-size: 13px; }
+        .nav-project-highlight img { width: 16px; height: 16px; }
+        .projects-icon { width: 24px; height: 32px; }
+        .projects-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; min-width: 240px; }
+        .projects-grid .link-box { min-height: 80px; padding: 6px 10px; }
+        .projects-grid .link-box a { font-size: 11px; }
+        .projects-grid .link-box img { width: 24px; height: 24px; margin-bottom: 4px; }
+        .search-input { font-size: 13px; padding: 8px 12px; }
+        .search-button { font-size: 13px; padding: 8px 12px; min-width: 70px; }
+        .search-label { font-size: 13px; }
+        .modal-content { width: 95%; padding: 15px; }
+        .modal-content h3 { font-size: 16px; }
+        .modal-content label { font-size: 13px; }
+        .modal-content input { font-size: 13px; padding: 6px; }
+        .modal-buttons button { font-size: 13px; padding: 6px 12px; }
+        .action-menu button { font-size: 12px; padding: 6px 12px; }
+    }
+    @media (max-width: 480px) {
+        .main-heading { font-size: 32px; }
+        .links-grid { grid-template-columns: repeat(1, 1fr); gap: 8px; }
+        .links-grid#second-links-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .link-box { min-height: 70px; }
+        .link-box a { font-size: 10px; }
+        .link-box .favicon-img { width: 20px; height: 20px; }
+        .add-box { min-height: 70px; font-size: 18px; }
+        .projects-icon { width: 20px; height: 26px; }
+        .projects-grid { grid-template-columns: 1fr; gap: 8px; min-width: 160px; }
+        .projects-grid .link-box { min-height: 70px; padding: 6px 8px; }
+        .projects-grid .link-box a { font-size: 10px; }
+        .projects-grid .link-box img { width: 20px; height: 20px; margin-bottom: 3px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <div class="nav-left-links" id="nav-links-container"></div>
+    <div class="nav-right-projects">
+        <h4 class="nav-project-highlight">
+            <img alt="Mafia Resell Icon" id="mafia-favicon" src="" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=18';"/>
+            Mafia Resell
+        </h4>
+        <a class="mafia-btn" href="https://mafiaresell.com" target="_blank">Join For Earning</a>
+        <a class="mafia-btn" href="https://mafiaresell.com" target="_blank">Shopping</a>
+        <a class="mafia-btn" href="https://mafiaresell.com" target="_blank">Join For Reselling</a>
+        <div class="projects-menu-container">
+            <button id="projects-btn" onclick="toggleProjectsMenu(event)">
+                <span class="projects-icon">
+                    <svg height="40" viewBox="0 0 30 40" width="30" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Complete original SVG with all dots -->
+                        <circle cx="15" cy="20" fill="#333" r="1.5"/>
+                        <circle cx="18" cy="20" fill="#333" r="1"/>
+                        <circle cx="17.598" cy="22.598" fill="#333" r="1"/>
+                        <circle cx="15" cy="23" fill="#333" r="1"/>
+                        <circle cx="12.402" cy="22.598" fill="#333" r="1"/>
+                        <circle cx="12" cy="20" fill="#333" r="1"/>
+                        <circle cx="12.402" cy="17.402" fill="#333" r="1"/>
+                        <circle cx="20" cy="20" fill="#333" r="1"/>
+                        <circle cx="19.142" cy="24.142" fill="#333" r="1"/>
+                        <circle cx="15" cy="25" fill="#333" r="1"/>
+                        <circle cx="10.858" cy="24.142" fill="#333" r="1"/>
+                        <circle cx="10" cy="20" fill="#333" r="1"/>
+                        <circle cx="10.858" cy="15.858" fill="#333" r="1"/>
+                        <circle cx="15" cy="15" fill="#333" r="1"/>
+                        <circle cx="19.142" cy="15.858" fill="#333" r="1"/>
+                        <circle cx="22" cy="20" fill="#333" r="1"/>
+                        <circle cx="21.052" cy="26.052" fill="#333" r="1"/>
+                        <circle cx="17" cy="27" fill="#333" r="1"/>
+                        <circle cx="11.948" cy="25.052" fill="#333" r="1"/>
+                        <circle cx="9" cy="21" fill="#333" r="1"/>
+                        <circle cx="9" cy="19" fill="#333" r="1"/>
+                        <circle cx="11.948" cy="14.948" fill="#333" r="1"/>
+                        <circle cx="17" cy="13" fill="#333" r="1"/>
+                        <circle cx="21.052" cy="13.948" fill="#333" r="1"/>
+                        <circle cx="22" cy="20" fill="#333" r="1"/>
+                        <circle cx="24" cy="20" fill="#333" r="1"/>
+                        <circle cx="22.757" cy="28.757" fill="#333" r="1"/>
+                        <circle cx="18" cy="29" fill="#333" r="1"/>
+                        <circle cx="12.243" cy="27.757" fill="#333" r="1"/>
+                        <circle cx="9" cy="24" fill="#333" r="1"/>
+                        <circle cx="8" cy="20" fill="#333" r="1"/>
+                        <circle cx="9" cy="16" fill="#333" r="1"/>
+                        <circle cx="12.243" cy="12.243" fill="#333" r="1"/>
+                        <circle cx="18" cy="11" fill="#333" r="1"/>
+                        <circle cx="22.757" cy="12.243" fill="#333" r="1"/>
+                        <circle cx="24" cy="16" fill="#333" r="1"/>
+                        <circle cx="24" cy="24" fill="#333" r="1"/>
+                        <!-- All remaining dots from original -->
+                        <circle cx="26" cy="20" fill="#333" r="1"/>
+                        <circle cx="24.454" cy="30.454" fill="#333" r="1"/>
+                        <circle cx="19" cy="31" fill="#333" r="1"/>
+                        <circle cx="12.546" cy="29.454" fill="#333" r="1"/>
+                        <circle cx="9" cy="26" fill="#333" r="1"/>
+                        <circle cx="7" cy="22" fill="#333" r="1"/>
+                        <circle cx="7" cy="18" fill="#333" r="1"/>
+                        <circle cx="9" cy="14" fill="#333" r="1"/>
+                        <circle cx="12.546" cy="10.546" fill="#333" r="1"/>
+                        <circle cx="19" cy="9" fill="#333" r="1"/>
+                        <circle cx="24.454" cy="10.546" fill="#333" r="1"/>
+                        <circle cx="26" cy="14" fill="#333" r="1"/>
+                        <circle cx="26" cy="26" fill="#333" r="1"/>
+                        <circle cx="24" cy="28" fill="#333" r="1"/>
+                        <circle cx="28" cy="20" fill="#333" r="1"/>
+                        <circle cx="26.142" cy="32.142" fill="#333" r="1"/>
+                        <circle cx="20" cy="33" fill="#333" r="1"/>
+                        <circle cx="12.858" cy="31.142" fill="#333" r="1"/>
+                        <circle cx="9" cy="28" fill="#333" r="1"/>
+                        <circle cx="6" cy="24" fill="#333" r="1"/>
+                        <circle cx="5" cy="20" fill="#333" r="1"/>
+                        <circle cx="6" cy="16" fill="#333" r="1"/>
+                        <circle cx="9" cy="12" fill="#333" r="1"/>
+                        <circle cx="12.858" cy="8.858" fill="#333" r="1"/>
+                        <circle cx="20" cy="7" fill="#333" r="1"/>
+                        <circle cx="26.142" cy="8.858" fill="#333" r="1"/>
+                        <circle cx="28" cy="12" fill="#333" r="1"/>
+                        <circle cx="28" cy="28" fill="#333" r="1"/>
+                        <circle cx="26" cy="30" fill="#333" r="1"/>
+                        <circle cx="24" cy="32" fill="#333" r="1"/>
+                        <circle cx="30" cy="20" fill="#333" r="1"/>
+                        <circle cx="27.826" cy="34.174" fill="#333" r="1"/>
+                        <circle cx="21" cy="35" fill="#333" r="1"/>
+                        <circle cx="13.174" cy="32.826" fill="#333" r="1"/>
+                        <circle cx="9" cy="30" fill="#333" r="1"/>
+                        <circle cx="6" cy="26" fill="#333" r="1"/>
+                        <circle cx="4" cy="22" fill="#333" r="1"/>
+                        <circle cx="3" cy="18" fill="#333" r="1"/>
+                        <circle cx="4" cy="14" fill="#333" r="1"/>
+                        <circle cx="6" cy="10" fill="#333" r="1"/>
+                        <circle cx="9" cy="8" fill="#333" r="1"/>
+                        <circle cx="13.174" cy="6.826" fill="#333" r="1"/>
+                        <circle cx="21" cy="5" fill="#333" r="1"/>
+                        <circle cx="27.826" cy="6.826" fill="#333" r="1"/>
+                        <circle cx="30" cy="10" fill="#333" r="1"/>
+                        <circle cx="30" cy="30" fill="#333" r="1"/>
+                        <circle cx="27" cy="33" fill="#333" r="1"/>
+                        <circle cx="24" cy="34" fill="#333" r="1"/>
+                        <circle cx="30" cy="23" fill="#333" r="1"/>
+                        <circle cx="29.5" cy="36.5" fill="#333" r="1"/>
+                        <circle cx="22" cy="37" fill="#333" r="1"/>
+                        <circle cx="13.5" cy="34.5" fill="#333" r="1"/>
+                        <circle cx="9" cy="32" fill="#333" r="1"/>
+                        <circle cx="6" cy="28" fill="#333" r="1"/>
+                        <circle cx="3" cy="24" fill="#333" r="1"/>
+                        <circle cx="2" cy="20" fill="#333" r="1"/>
+                        <circle cx="3" cy="16" fill="#333" r="1"/>
+                        <circle cx="6" cy="12" fill="#333" r="1"/>
+                        <circle cx="9" cy="8" fill="#333" r="1"/>
+                        <circle cx="13.5" cy="5.5" fill="#333" r="1"/>
+                        <circle cx="22" cy="3" fill="#333" r="1"/>
+                        <circle cx="29.5" cy="5.5" fill="#333" r="1"/>
+                        <circle cx="30" cy="8" fill="#333" r="1"/>
+                        <circle cx="30" cy="32" fill="#333" r="1"/>
+                        <circle cx="27" cy="35" fill="#333" r="1"/>
+                        <circle cx="24" cy="36" fill="#333" r="1"/>
+                        <circle cx="20" cy="37" fill="#333" r="1"/>
+                        <circle cx="16" cy="37" fill="#333" r="1"/>
+                    </svg>
+                </span>
+                Our Projects
+            </button>
+            <div class="projects-grid" id="projects-grid"></div>
+        </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper">
+    <h1 class="main-heading">Mafior's Custom Hub</h1>
+
+    <div class="main-content">
+      <div class="links-portion">
+        <div class="links-grid" id="links-grid">
+          <div class="link-box add-box" onclick="showModal(null, 'grid')">+</div>
+        </div>
+      </div>
+
+      <div class="search-portion">
+        <div class="search-engines-list">
+          <div class="search-group">
+            <label class="search-label">Google</label>
+            <form class="search-form" onsubmit="return performSearch('google', this)">
+              <input type="text" class="search-input" placeholder="Search on Google..." required />
+              <button type="submit" class="search-button">Go</button>
+            </form>
+          </div>
+          <div class="search-group">
+            <label class="search-label">Bing</label>
+            <form class="search-form" onsubmit="return performSearch('bing', this)">
+              <input type="text" class="search-input" placeholder="Search on Bing..." required />
+              <button type="submit" class="search-button">Go</button>
+            </form>
+          </div>
+          <div class="search-group">
+            <label class="search-label">Yahoo</label>
+            <form class="search-form" onsubmit="return performSearch('yahoo', this)">
+              <input type="text" class="search-input" placeholder="Search on Yahoo..." required />
+              <button type="submit" class="search-button">Go</button>
+            </form>
+          </div>
+          <div class="search-group">
+            <label class="search-label">Baidu</label>
+            <form class="search-form" onsubmit="return performSearch('baidu', this)">
+              <input type="text" class="search-input" placeholder="Search on Baidu..." required />
+              <button type="submit" class="search-button">Go</button>
+            </form>
+          </div>
+          <div class="search-group">
+            <label class="search-label">Yandex</label>
+            <form class="search-form" onsubmit="return performSearch('yandex', this)">
+              <input type="text" class="search-input" placeholder="Search on Yandex..." required />
+              <button type="submit" class="search-button">Go</button>
+            </form>
+          </div>
+          <div class="search-group">
+            <label class="search-label">DuckDuckGo</label>
+            <form class="search-form" onsubmit="return performSearch('duckduckgo', this)">
+              <input type="text" class="search-input" placeholder="Search on DuckDuckGo..." required />
+              <button type="submit" class="search-button">Go</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="second-links-portion">
+      <div class="links-grid" id="second-links-grid">
+        <div class="link-box add-box" onclick="showModal(null, 'second-grid')">+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="link-modal">
+    <div class="modal-content">
+      <h3 id="modal-title">Add New Link</h3>
+      <form id="link-form" onsubmit="return saveLink(event)">
+        <input id="link-index" type="hidden" value="-1"/>
+        <label for="link-title">Link Title:</label>
+        <input id="link-title" placeholder="Enter title" required type="text"/>
+        <label for="link-url">Paste Link (URL):</label>
+        <input id="link-url" placeholder="Paste full URL here (e.g. https://example.com)" required type="text"/>
+        <div class="modal-buttons">
+          <button id="cancel-btn" onclick="hideModal()" type="button">Cancel</button>
+          <button id="save-btn" type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="action-menu" id="action-menu" style="display:none;"></div>
+
+  <script>
+    let currentLinkIndex = -1;
+
+    function getFaviconUrl(url, size = 32) {
+        let cleanUrl = url.replace(/^(https?:\/\/)/, '');
+        let domainOnly = cleanUrl.split('/')[0];
+        return `https://s2.googleusercontent.com/s2/favicons?domain=${domainOnly}&sz=${size}`;
+    }
+
+    function performSearch(engine, form) {
+      var query = form.querySelector('input').value;
+      if (query.trim() !== '') {
+        var url;
+        var encodedQuery = encodeURIComponent(query);
+        switch (engine) {
+          case 'google': url = 'https://www.google.com/search?q=' + encodedQuery; break;
+          case 'bing': url = 'https://www.bing.com/search?q=' + encodedQuery; break;
+          case 'yahoo': url = 'https://search.yahoo.com/search?p=' + encodedQuery; break;
+          case 'baidu': url = 'https://www.baidu.com/s?wd=' + encodedQuery; break;
+          case 'yandex': url = 'https://yandex.com/search/?text=' + encodedQuery; break;
+          case 'duckduckgo': url = 'https://duckduckgo.com/?q=' + encodedQuery; break;
+          default: return false;
+        }
+        window.open(url, '_blank');
+      }
+      return false;
+    }
+
+    const PROJECTS_LINKS = [
+        { title: 'Mafia Resell', url: 'https://mafiaresell.com' },
+        { title: 'Tech Praa', url: 'https://techpraa.blogspot.com' },
+        { title: 'Blogspot', url: 'https://blogspot.com' },
+        { title: 'YouTube', url: 'https://youtube.com' },
+        { title: 'Google', url: 'https://google.com' }
+    ];
+
+    // ALL ORIGINAL FUNCTIONS - EXACT SAME
+    function renderProjectsLinks() {
+        const menu = document.getElementById('projects-grid');
+        menu.innerHTML = '';
+        PROJECTS_LINKS.forEach(project => {
+            const faviconUrl = getFaviconUrl(project.url, 28);
+            const box = document.createElement('div');
+            box.className = 'link-box no-dots';
+            box.innerHTML = `
+                <a href="${project.url}" target="_blank" title="${project.title}">
+                    <img src="${faviconUrl}" class="favicon-img" alt="${project.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
+                    ${project.title}
+                </a>
+            `;
+            menu.appendChild(box);
+        });
+    }
+
+    function toggleProjectsMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('projects-grid');
+        const isVisible = menu.style.display === 'grid';
+        hideActionMenu();
+        hideModal();
+        menu.style.display = isVisible ? 'none' : 'grid';
+    }
+
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('projects-grid');
+        const btn = document.getElementById('projects-btn');
+        if (menu.style.display === 'grid' && !menu.contains(e.target) && e.target !== btn) {
+            menu.style.display = 'none';
+        }
+    });
+
+    var NAV_LINKS_KEY = 'mafior_nav_links';
+    const DEFAULT_NAV_LINKS = [
+        { title: 'Social', url: 'https://social.com' },
+        { title: 'News', url: 'https://news.com' },
+        { title: 'Tech', url: 'https://tech.com' },
+        { title: 'Business', url: 'https://business.com' },
+        { title: 'More', url: 'https://more.com' }
+    ];
+
+    function loadNavLinks() {
+        var linksJson = localStorage.getItem(NAV_LINKS_KEY);
+        return linksJson ? JSON.parse(linksJson) : DEFAULT_NAV_LINKS;
+    }
+
+    function saveNavLinks(links) {
+        localStorage.setItem(NAV_LINKS_KEY, JSON.stringify(links));
+    }
+
+    function renderNavLinks() {
+        var links = loadNavLinks();
+        var container = document.getElementById('nav-links-container');
+        container.innerHTML = '';
+        links.forEach((link, index) => {
+            const faviconUrl = getFaviconUrl(link.url, 18);
+            var box = document.createElement('div');
+            box.className = 'nav-link-box';
+            box.innerHTML = `
+                <span class="dots" onclick="showActionMenu(event, ${index}, 'nav')">⋮</span>
+                <a href="${link.url}" target="_blank" title="${link.title}" class="nav-link-inner">
+                    <img src="${faviconUrl}" alt="${link.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=18';">
+                    ${link.title}
+                </a>
+            `;
+            container.appendChild(box);
+        });
+        var addBox = document.createElement('div');
+        addBox.className = 'nav-link-box add-box';
+        addBox.innerHTML = '+';
+        addBox.onclick = function() { showModal(null, 'nav'); };
+        container.appendChild(addBox);
+        document.getElementById('mafia-favicon').src = getFaviconUrl('https://mafiaresell.com', 18);
+    }
+
+    var LINKS_KEY = 'mafior_custom_links';
+    var LINKS_KEY_SECOND = 'mafior_custom_links_second';
+
+    function saveLinks(links) {
+        localStorage.setItem(LINKS_KEY, JSON.stringify(links));
+    }
+
+    function loadLinks() {
+        var linksJson = localStorage.getItem(LINKS_KEY);
+        return linksJson ? JSON.parse(linksJson) : [
+            { title: 'Google', url: 'https://www.google.com' },
+            { title: 'Blogger', url: 'https://www.blogger.com' }
+        ];
+    }
+
+    function saveSecondLinks(links) {
+        localStorage.setItem(LINKS_KEY_SECOND, JSON.stringify(links));
+    }
+
+    function loadSecondLinks() {
+        var linksJson = localStorage.getItem(LINKS_KEY_SECOND);
+        return linksJson ? JSON.parse(linksJson) : [];
+    }
+
+    function renderLinks() {
+        var links = loadLinks();
+        var grid = document.getElementById('links-grid');
+        var addBox = grid.querySelector('.add-box');
+        grid.querySelectorAll('.link-box:not(.add-box)').forEach(box => box.remove());
+        links.forEach((link, index) => {
+            var box = document.createElement('div');
+            box.className = 'link-box';
+            const faviconUrl = getFaviconUrl(link.url, 28);
+            box.innerHTML = `
+                <span class="dots" onclick="showActionMenu(event, ${index}, 'grid')">⋮</span>
+                <a href="${link.url}" target="_blank" title="${link.title}">
+                    <img src="${faviconUrl}" class="favicon-img" alt="${link.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
+                    ${link.title}
+                </a>
+            `;
+            grid.insertBefore(box, addBox);
+        });
+    }
+
+    function renderSecondLinks() {
+        var links = loadSecondLinks();
+        var grid = document.getElementById('second-links-grid');
+        var addBox = grid.querySelector('.add-box');
+        grid.querySelectorAll('.link-box:not(.add-box)').forEach(box => box.remove());
+        links.forEach((link, index) => {
+            var box = document.createElement('div');
+            box.className = 'link-box';
+            const faviconUrl = getFaviconUrl(link.url, 28);
+            box.innerHTML = `
+                <span class="dots" onclick="showActionMenu(event, ${index}, 'second-grid')">⋮</span>
+                <a href="${link.url}" target="_blank" title="${link.title}">
+                    <img src="${faviconUrl}" class="favicon-img" alt="${link.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
+                    ${link.title}
+                </a>
+            `;
+            grid.insertBefore(box, addBox);
+        });
+    }
+
+    function showModal(index = null, type = 'grid') {
+        var modal = document.getElementById('link-modal');
+        var titleInput = document.getElementById('link-title');
+        var urlInput = document.getElementById('link-url');
+        currentLinkIndex = index;
+        modal.setAttribute('data-link-type', type);
+        document.getElementById('modal-title').textContent = (index !== null ? 'Edit ' : 'Add New ') + (type === 'nav' ? 'Header Link' : type === 'second-grid' ? 'More Quick Link' : 'Quick Link');
+        if (index !== null) {
+            var links = type === 'nav' ? loadNavLinks() : type === 'second-grid' ? loadSecondLinks() : loadLinks();
+            var link = links[index];
+            titleInput.value = link.title;
+            urlInput.value = link.url;
+        } else {
+            titleInput.value = '';
+            urlInput.value = '';
+        }
+        modal.style.display = 'flex';
+    }
+
+    function hideModal() {
+        document.getElementById('link-modal').style.display = 'none';
+    }
+
+    function saveLink(event) {
+        event.preventDefault();
+        var title = document.getElementById('link-title').value.trim();
+        var url = document.getElementById('link-url').value.trim();
+        var linkType = document.getElementById('link-modal').getAttribute('data-link-type');
+        if (url && !/^https?:\/\//i.test(url)) {
+            url = 'https://' + url;
+        }
+        if (title && url) {
+            var newLink = { title: title, url: url };
+            if (linkType === 'nav') {
+                var links = loadNavLinks();
+                if (currentLinkIndex !== -1 && currentLinkIndex !== null) {
+                    links[currentLinkIndex] = newLink;
+                } else {
+                    links.push(newLink);
+                }
+                saveNavLinks(links);
+                renderNavLinks();
+            } else if (linkType === 'second-grid') {
+                var links = loadSecondLinks();
+                if (currentLinkIndex !== -1 && currentLinkIndex !== null) {
+                    links[currentLinkIndex] = newLink;
+                } else {
+                    links.push(newLink);
+                }
+                saveSecondLinks(links);
+                renderSecondLinks();
+            } else {
+                var links = loadLinks();
+                if (currentLinkIndex !== -1 && currentLinkIndex !== null) {
+                    links[currentLinkIndex] = newLink;
+                } else {
+                    links.push(newLink);
+                }
+                saveLinks(links);
+                renderLinks();
+            }
+            hideModal();
+        }
+        return false;
+    }
+
+    function showActionMenu(event, index, type = 'grid') {
+        event.preventDefault();
+        event.stopPropagation();
+        currentLinkIndex = index;
+        var menu = document.getElementById('action-menu');
+        menu.innerHTML = type === 'nav' ? `
+            <button onclick="addLinkFromMenu()">Add Link</button>
+            <button onclick="editLinkFromMenu()">Edit Link</button>
+            <button onclick="deleteLinkFromMenu()">Remove Link</button>
+            <button onclick="saveLinksToStorage()">Save</button>
+        ` : `
+            <button onclick="addLinkFromMenu()">Add Link</button>
+            <button onclick="editLinkFromMenu()">Edit Link</button>
+            <button onclick="deleteLinkFromMenu()">Remove Link</button>
+        `;
+        menu.style.display = 'block';
+        var rect = event.target.getBoundingClientRect();
+        var menuWidth = menu.offsetWidth;
+        var menuHeight = menu.offsetHeight;
+        var windowWidth = window.innerWidth;
+        var windowHeight = window.innerHeight;
+        var left = rect.right - menuWidth;
+        var top = rect.bottom + 5;
+        if (left < 0) left = rect.left;
+        if (top + menuHeight > windowHeight) top = rect.top - menuHeight - 5;
+        menu.style.left = left + 'px';
+        menu.style.top = top + 'px';
+        menu.setAttribute('data-link-type', type);
+        menu.focus();
+    }
+
+    function hideActionMenu() {
+        document.getElementById('action-menu').style.display = 'none';
+    }
+
+    function addLinkFromMenu() {
+        var type = document.getElementById('action-menu').getAttribute('data-link-type');
+        hideActionMenu();
+        showModal(null, type);
+    }
+
+    function editLinkFromMenu() {
+        var type = document.getElementById('action-menu').getAttribute('data-link-type');
+        hideActionMenu();
+        showModal(currentLinkIndex, type);
+    }
+
+    function deleteLinkFromMenu() {
+        hideActionMenu();
+        if (confirm('Are you sure you want to remove this link?')) {
+            var type = document.getElementById('action-menu').getAttribute('data-link-type');
+            if (type === 'nav') {
+                var links = loadNavLinks();
+                links.splice(currentLinkIndex, 1);
+                saveNavLinks(links);
+                renderNavLinks();
+            } else if (type === 'second-grid') {
+                var links = loadSecondLinks();
+                links.splice(currentLinkIndex, 1);
+                saveSecondLinks(links);
+                renderSecondLinks();
+            } else {
+                var links = loadLinks();
+                links.splice(currentLinkIndex, 1);
+                saveLinks(links);
+                renderLinks();
+            }
+        }
+    }
+
+    function saveLinksToStorage() {
+        var type = document.getElementById('action-menu').getAttribute('data-link-type');
+        hideActionMenu();
+        if (type === 'nav') {
+            var links = loadNavLinks();
+            saveNavLinks(links);
+            alert('Header links saved successfully!');
+        } else if (type === 'second-grid') {
+            var links = loadSecondLinks();
+            saveSecondLinks(links);
+            alert('More Quick Links saved successfully!');
+        } else {
+            var links = loadLinks();
+            saveLinks(links);
+            alert('Quick Links saved successfully!');
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('action-menu');
+        if (menu.style.display === 'block' && !menu.contains(e.target) && !e.target.classList.contains('dots')) {
+            hideActionMenu();
+        }
+    });
+
+    window.onload = function() {
+        renderLinks();
+        renderSecondLinks();
+        renderNavLinks();
+        renderProjectsLinks();
+    };
+  </script>
+
+</body>
+</html>
