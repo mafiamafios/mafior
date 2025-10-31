@@ -431,17 +431,29 @@
   </div>
 
   <!-- HIDDEN AUTH MENU -->
-  <div id="authMenu" style="display:none;position:fixed;top:50px;right:10px;background:#fff;padding:12px;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:200px;">
-    <div style="margin-bottom:8px;">
-      <button onclick="signInWithGoogle()" style="width:100%;background:#4285F4;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-        Sign in with Google
-      </button>
-    </div>
-    <div style="margin-bottom:8px;">
-      <button onclick="signInWithTwitter()" style="width:100%;background:#000;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-        Sign in with X
-      </button>
-    </div>
+  <!-- MAGIC LINK AUTH MENU (Replace entire authMenu) -->
+<div id="authMenu" style="display:none;position:fixed;top:50px;right:10px;background:#fff;padding:12px;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:200px;">
+  <!-- Google -->
+  <div style="margin-bottom:8px;">
+    <button onclick="signInWithGoogle()" style="width:100%;background:#4285F4;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+      Sign in with Google
+    </button>
+  </div>
+  <!-- X (Twitter) -->
+  <div style="margin-bottom:8px;">
+    <button onclick="signInWithTwitter()" style="width:100%;background:#000;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+      Sign in with X
+    </button>
+  </div>
+  <!-- Magic Link (Direct Email) -->
+  <div style="margin-bottom:8px;">
+    <input type="email" id="magicEmail" placeholder="Your Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
+    <button onclick="sendMagicLink()" style="width:100%;background:#D81B60;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+      Continue with Email
+    </button>
+  </div>
+  <div id="authStatus" style="font-size:11px;color:#666;text-align:center;margin-top:8px;"></div>
+</div>
     <div style="margin-bottom:8px;">
       <input type="email" id="emailInput" placeholder="Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
       <input type="password" id="passwordInput" placeholder="Password" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
@@ -969,25 +981,54 @@
         document.getElementById('authStatus').textContent = error ? error.message : 'Signed in!';
     }
 
-    async function signOut() {
-        await supabase.auth.signOut();
-        document.getElementById('authMenu').style.display = 'none';
-    }
+    // MAGIC LINK FUNCTION (Signup + Login Auto)
+async function sendMagicLink() {
+  const email = document.getElementById('magicEmail').value.trim();
+  if (!email) {
+    document.getElementById('authStatus').textContent = 'Enter your email';
+    return;
+  }
 
-    // === AUTH STATE LISTENER ===
-    supabase.auth.onAuthStateChange((event, session) => {
-        const status = document.getElementById('authStatus');
-        const toggle = document.getElementById('authMenuToggle');
-        if (session?.user) {
-            const name = session.user.user_metadata?.full_name || session.user.email.split('@')[0] || 'User';
-            status.innerHTML = `<div style="margin-bottom:8px;"><strong>Welcome, ${name}</strong></div>
-                                <button onclick="signOut()" style="width:100%;background:#ff4444;color:white;padding:6px;border:none;border-radius:5px;font-size:11px;cursor:pointer;">Sign Out</button>`;
-            toggle.textContent = '✓';
-        } else {
-            status.innerHTML = '';
-            toggle.textContent = '⋯';
-        }
-    });
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: 'https://mafior.mafiaresell.com'
+    }
+  });
+
+  if (error) {
+    document.getElementById('authStatus').textContent = error.message;
+  } else {
+    document.getElementById('authStatus').innerHTML = 
+      `Check <strong>${email}</strong> for magic link! (Check spam too)`;
+  }
+}
+
+// SIGN OUT FUNCTION (Agar nahi hai to add karo)
+async function signOut() {
+  await supabase.auth.signOut();
+  document.getElementById('authMenu').style.display = 'none';
+}
+
+    // AUTH STATE LISTENER (Welcome + Sign Out)
+supabase.auth.onAuthStateChange((event, session) => {
+  const status = document.getElementById('authStatus');
+  const toggle = document.getElementById('authMenuToggle');
+  
+  if (session?.user) {
+    const name = session.user.user_metadata?.full_name || 
+                 session.user.email?.split('@')[0] || 'User';
+    status.innerHTML = `
+      <div style="margin-bottom:8px;"><strong>Welcome, ${name}!</strong></div>
+      <button onclick="signOut()" style="width:100%;background:#ff4444;color:white;padding:6px;border:none;border-radius:5px;font-size:11px;cursor:pointer;">
+        Sign Out
+      </button>`;
+    toggle.textContent = '✓';
+  } else {
+    status.innerHTML = '';
+    toggle.textContent = '⋯';
+  }
+});
 
     // === CLEAR CACHE / HISTORY ===
     function clearCache() {
