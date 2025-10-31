@@ -980,7 +980,7 @@
     supabase.auth.onAuthStateChange((event, session) => {
       const status = document.getElementById('authStatus');
       const toggle = document.getElementById('authMenuToggle');
-      
+      const menu = document.getElementById('authMenu');
       if (session?.user) {
         const name = session.user.user_metadata?.full_name || 
                      session.user.email?.split('@')[0] || 'User';
@@ -990,9 +990,11 @@
             Sign Out
           </button>`;
         toggle.textContent = '✓';
+        menu.style.display = 'block';
       } else {
         status.innerHTML = '';
         toggle.textContent = '⋯';
+        menu.style.display = 'none';
       }
     });
 
@@ -1006,3 +1008,4 @@
   </script>
 </body>
 </html>
+
