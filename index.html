@@ -15,7 +15,7 @@
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* Exact same CSS as original - no changes */
+    /* Same CSS as original - no changes */
     body {
       display: flex;
       flex-direction: column;
@@ -373,7 +373,7 @@
       cursor: pointer;
     }
     .action-menu button:hover { background-color: #f0f0f0; color: #D81B60; }
-    /* Mobile Responsive - Exact same as original */
+    /* Mobile Responsive */
     @media (max-width: 768px) {
         body { padding-top: 140px; }
         .main-content { flex-direction: column; }
@@ -430,48 +430,28 @@
     ⋯
   </div>
 
-  <!-- HIDDEN AUTH MENU -->
-  <!-- MAGIC LINK AUTH MENU (Replace entire authMenu) -->
-<div id="authMenu" style="display:none;position:fixed;top:50px;right:10px;background:#fff;padding:12px;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:200px;">
-  <!-- Google -->
-  <div style="margin-bottom:8px;">
-    <button onclick="signInWithGoogle()" style="width:100%;background:#4285F4;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-      Sign in with Google
-    </button>
-  </div>
-  <!-- X (Twitter) -->
-  <div style="margin-bottom:8px;">
-    <button onclick="signInWithTwitter()" style="width:100%;background:#000;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-      Sign in with X
-    </button>
-  </div>
-  <!-- Magic Link (Direct Email) -->
-  <div style="margin-bottom:8px;">
-    <input type="email" id="magicEmail" placeholder="Your Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
-    <button onclick="sendMagicLink()" style="width:100%;background:#D81B60;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-      Continue with Email
-    </button>
-  </div>
-  <div id="authStatus" style="font-size:11px;color:#666;text-align:center;margin-top:8px;"></div>
-</div>
+  <!-- AUTH MENU (Magic Link + Google + X) -->
+  <div id="authMenu" style="display:none;position:fixed;top:50px;right:10px;background:#fff;padding:12px;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:200px;">
+    <!-- Google -->
     <div style="margin-bottom:8px;">
-      <input type="email" id="emailInput" placeholder="Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
-      <input type="password" id="passwordInput" placeholder="Password" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
-      <button onclick="signInWithEmail()" style="width:100%;background:#D81B60;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-        Sign in with Email
+      <button onclick="signInWithGoogle()" style="width:100%;background:#4285F4;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+        Sign in with Google
+      </button>
+    </div>
+    <!-- X (Twitter) -->
+    <div style="margin-bottom:8px;">
+      <button onclick="signInWithTwitter()" style="width:100%;background:#000;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+        Sign in with X
+      </button>
+    </div>
+    <!-- Magic Link -->
+    <div style="margin-bottom:8px;">
+      <input type="email" id="magicEmail" placeholder="Your Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
+      <button onclick="sendMagicLink()" style="width:100%;background:#D81B60;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+        Continue with Email
       </button>
     </div>
     <div id="authStatus" style="font-size:11px;color:#666;text-align:center;margin-top:8px;"></div>
-  </div>
-
-  <!-- Clear Cache & History Buttons -->
-  <div style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;gap:10px;">
-    <button onclick="clearCache()" style="background:#D81B60;color:white;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
-      Clear Cache
-    </button>
-    <button onclick="clearHistory()" style="background:#A00037;color:white;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
-      Clear History
-    </button>
   </div>
 
   <div class="top-nav">
@@ -488,7 +468,6 @@
             <button id="projects-btn" onclick="toggleProjectsMenu(event)">
                 <span class="projects-icon">
                     <svg height="40" viewBox="0 0 30 40" width="30" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Complete SVG dots (same as original) -->
                         <circle cx="15" cy="20" fill="#333" r="1.5"/>
                         <circle cx="18" cy="20" fill="#333" r="1"/>
                         <circle cx="17.598" cy="22.598" fill="#333" r="1"/>
@@ -754,7 +733,7 @@
         hideActionMenu(); hideModal();
     }
 
-    // === NAV LINKS (Top Bar) ===
+    // === NAV LINKS ===
     const NAV_KEY = 'mafior_nav_links';
     const DEFAULT_NAV = [
         { title: 'Social', url: 'https://social.com' },
@@ -888,7 +867,7 @@
         return false;
     }
 
-    // === 3 DOTS ACTION MENU (Functional) ===
+    // === 3 DOTS ACTION MENU ===
     function showActionMenu(e, index, type) {
         e.preventDefault();
         e.stopPropagation();
@@ -934,7 +913,7 @@
         hideActionMenu();
     }
 
-    // === AUTH MENU TOGGLE (3 DOTS TOP RIGHT) ===
+    // === AUTH MENU TOGGLE ===
     document.getElementById('authMenuToggle').addEventListener('click', (e) => {
         e.stopPropagation();
         const menu = document.getElementById('authMenu');
@@ -955,7 +934,7 @@
         }
     });
 
-    // === AUTH FUNCTIONS (Google, X, Email, Logout) ===
+    // === AUTH FUNCTIONS ===
     async function signInWithGoogle() {
         await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -970,80 +949,52 @@
         });
     }
 
-    async function signInWithEmail() {
-        const email = document.getElementById('emailInput').value.trim();
-        const password = document.getElementById('passwordInput').value.trim();
-        if (!email || !password) {
-            document.getElementById('authStatus').textContent = 'Enter email & password';
-            return;
+    async function sendMagicLink() {
+      const email = document.getElementById('magicEmail').value.trim();
+      if (!email) {
+        document.getElementById('authStatus').textContent = 'Enter your email';
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: 'https://mafior.mafiaresell.com'
         }
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        document.getElementById('authStatus').textContent = error ? error.message : 'Signed in!';
+      });
+
+      if (error) {
+        document.getElementById('authStatus').textContent = error.message;
+      } else {
+        document.getElementById('authStatus').innerHTML = 
+          `Check <strong>${email}</strong> for magic link! (Check spam too)`;
+      }
     }
 
-    // MAGIC LINK FUNCTION (Signup + Login Auto)
-async function sendMagicLink() {
-  const email = document.getElementById('magicEmail').value.trim();
-  if (!email) {
-    document.getElementById('authStatus').textContent = 'Enter your email';
-    return;
-  }
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: 'https://mafior.mafiaresell.com'
-    }
-  });
-
-  if (error) {
-    document.getElementById('authStatus').textContent = error.message;
-  } else {
-    document.getElementById('authStatus').innerHTML = 
-      `Check <strong>${email}</strong> for magic link! (Check spam too)`;
-  }
-}
-
-// SIGN OUT FUNCTION (Agar nahi hai to add karo)
-async function signOut() {
-  await supabase.auth.signOut();
-  document.getElementById('authMenu').style.display = 'none';
-}
-
-    // AUTH STATE LISTENER (Welcome + Sign Out)
-supabase.auth.onAuthStateChange((event, session) => {
-  const status = document.getElementById('authStatus');
-  const toggle = document.getElementById('authMenuToggle');
-  
-  if (session?.user) {
-    const name = session.user.user_metadata?.full_name || 
-                 session.user.email?.split('@')[0] || 'User';
-    status.innerHTML = `
-      <div style="margin-bottom:8px;"><strong>Welcome, ${name}!</strong></div>
-      <button onclick="signOut()" style="width:100%;background:#ff4444;color:white;padding:6px;border:none;border-radius:5px;font-size:11px;cursor:pointer;">
-        Sign Out
-      </button>`;
-    toggle.textContent = '✓';
-  } else {
-    status.innerHTML = '';
-    toggle.textContent = '⋯';
-  }
-});
-
-    // === CLEAR CACHE / HISTORY ===
-    function clearCache() {
-        if (window.parent !== window) {
-            window.parent.postMessage({ action: 'clearCache' }, '*');
-        }
-        alert('Cache cleared!');
+    async function signOut() {
+      await supabase.auth.signOut();
+      document.getElementById('authMenu').style.display = 'none';
     }
 
-    function clearHistory() {
-        if (window.parent !== window) {
-            window.parent.postMessage({ action: 'clearHistory' }, '*');
-        }
-        alert('History cleared!');
-    }
+    // AUTH STATE LISTENER
+    supabase.auth.onAuthStateChange((event, session) => {
+      const status = document.getElementById('authStatus');
+      const toggle = document.getElementById('authMenuToggle');
+      
+      if (session?.user) {
+        const name = session.user.user_metadata?.full_name || 
+                     session.user.email?.split('@')[0] || 'User';
+        status.innerHTML = `
+          <div style="margin-bottom:8px;"><strong>Welcome, ${name}!</strong></div>
+          <button onclick="signOut()" style="width:100%;background:#ff4444;color:white;padding:6px;border:none;border-radius:5px;font-size:11px;cursor:pointer;">
+            Sign Out
+          </button>`;
+        toggle.textContent = '✓';
+      } else {
+        status.innerHTML = '';
+        toggle.textContent = '⋯';
+      }
+    });
 
     // === ON LOAD ===
     window.onload = () => {
