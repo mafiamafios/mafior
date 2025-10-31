@@ -4,6 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mafior's Custom Hub</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-HVGZLX3R8E"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-HVGZLX3R8E');
+  </script>
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* Exact same CSS as original - no changes */
     body {
@@ -415,6 +425,42 @@
   </style>
 </head>
 <body>
+  <!-- 3 DOTS MENU (TOP-RIGHT) -->
+  <div id="authMenuToggle" style="position:fixed;top:10px;right:10px;background:#fff;padding:6px 10px;border-radius:50%;z-index:9999;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;">
+    ⋯
+  </div>
+
+  <!-- HIDDEN AUTH MENU -->
+  <div id="authMenu" style="display:none;position:fixed;top:50px;right:10px;background:#fff;padding:12px;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:200px;">
+    <div style="margin-bottom:8px;">
+      <button onclick="signInWithGoogle()" style="width:100%;background:#4285F4;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+        Sign in with Google
+      </button>
+    </div>
+    <div style="margin-bottom:8px;">
+      <button onclick="signInWithTwitter()" style="width:100%;background:#000;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+        Sign in with X
+      </button>
+    </div>
+    <div style="margin-bottom:8px;">
+      <input type="email" id="emailInput" placeholder="Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
+      <input type="password" id="passwordInput" placeholder="Password" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
+      <button onclick="signInWithEmail()" style="width:100%;background:#D81B60;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
+        Sign in with Email
+      </button>
+    </div>
+    <div id="authStatus" style="font-size:11px;color:#666;text-align:center;margin-top:8px;"></div>
+  </div>
+
+  <!-- Clear Cache & History Buttons -->
+  <div style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;gap:10px;">
+    <button onclick="clearCache()" style="background:#D81B60;color:white;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      Clear Cache
+    </button>
+    <button onclick="clearHistory()" style="background:#A00037;color:white;padding:10px 16px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">
+      Clear History
+    </button>
+  </div>
 
   <div class="top-nav">
     <div class="nav-left-links" id="nav-links-container"></div>
@@ -430,7 +476,7 @@
             <button id="projects-btn" onclick="toggleProjectsMenu(event)">
                 <span class="projects-icon">
                     <svg height="40" viewBox="0 0 30 40" width="30" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Complete original SVG with all dots -->
+                        <!-- Complete SVG dots (same as original) -->
                         <circle cx="15" cy="20" fill="#333" r="1.5"/>
                         <circle cx="18" cy="20" fill="#333" r="1"/>
                         <circle cx="17.598" cy="22.598" fill="#333" r="1"/>
@@ -468,7 +514,6 @@
                         <circle cx="22.757" cy="12.243" fill="#333" r="1"/>
                         <circle cx="24" cy="16" fill="#333" r="1"/>
                         <circle cx="24" cy="24" fill="#333" r="1"/>
-                        <!-- All remaining dots from original -->
                         <circle cx="26" cy="20" fill="#333" r="1"/>
                         <circle cx="24.454" cy="30.454" fill="#333" r="1"/>
                         <circle cx="19" cy="31" fill="#333" r="1"/>
@@ -611,6 +656,7 @@
     </div>
   </div>
 
+  <!-- Modal for Add/Edit Link -->
   <div class="modal-overlay" id="link-modal">
     <div class="modal-content">
       <h3 id="modal-title">Add New Link</h3>
@@ -628,36 +674,42 @@
     </div>
   </div>
 
+  <!-- Action Menu (for 3 dots on links) -->
   <div class="action-menu" id="action-menu" style="display:none;"></div>
 
   <script>
+    // === SUPABASE INITIALIZATION ===
+    const supabase = window.supabase.createClient(
+      'https://gmexnhcawqfndbtsqauj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZXhuaGNhd3FmbmRidHNxYXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0NDczODAsImV4cCI6MjA2OTAyMzM4MH0.3Qsx0-pLF8gGlXE5Bnf_mFGlcNuUOVYhWZdDsupD3TM'
+    );
+
     let currentLinkIndex = -1;
 
+    // === FAVICON HELPER ===
     function getFaviconUrl(url, size = 32) {
         let cleanUrl = url.replace(/^(https?:\/\/)/, '');
         let domainOnly = cleanUrl.split('/')[0];
         return `https://s2.googleusercontent.com/s2/favicons?domain=${domainOnly}&sz=${size}`;
     }
 
+    // === SEARCH FUNCTIONALITY ===
     function performSearch(engine, form) {
-      var query = form.querySelector('input').value;
-      if (query.trim() !== '') {
-        var url;
-        var encodedQuery = encodeURIComponent(query);
-        switch (engine) {
-          case 'google': url = 'https://www.google.com/search?q=' + encodedQuery; break;
-          case 'bing': url = 'https://www.bing.com/search?q=' + encodedQuery; break;
-          case 'yahoo': url = 'https://search.yahoo.com/search?p=' + encodedQuery; break;
-          case 'baidu': url = 'https://www.baidu.com/s?wd=' + encodedQuery; break;
-          case 'yandex': url = 'https://yandex.com/search/?text=' + encodedQuery; break;
-          case 'duckduckgo': url = 'https://duckduckgo.com/?q=' + encodedQuery; break;
-          default: return false;
-        }
-        window.open(url, '_blank');
-      }
+      const query = form.querySelector('input').value.trim();
+      if (!query) return false;
+      const urls = {
+        google: `https://www.google.com/search?q=${encodeURIComponent(query)}`,
+        bing: `https://www.bing.com/search?q=${encodeURIComponent(query)}`,
+        yahoo: `https://search.yahoo.com/search?p=${encodeURIComponent(query)}`,
+        baidu: `https://www.baidu.com/s?wd=${encodeURIComponent(query)}`,
+        yandex: `https://yandex.com/search/?text=${encodeURIComponent(query)}`,
+        duckduckgo: `https://duckduckgo.com/?q=${encodeURIComponent(query)}`
+      };
+      window.open(urls[engine], '_blank');
       return false;
     }
 
+    // === PROJECTS DATA ===
     const PROJECTS_LINKS = [
         { title: 'Mafia Resell', url: 'https://mafiaresell.com' },
         { title: 'Tech Praa', url: 'https://techpraa.blogspot.com' },
@@ -666,43 +718,33 @@
         { title: 'Google', url: 'https://google.com' }
     ];
 
-    // ALL ORIGINAL FUNCTIONS - EXACT SAME
-    function renderProjectsLinks() {
+    function render_projectsLinks() {
         const menu = document.getElementById('projects-grid');
         menu.innerHTML = '';
-        PROJECTS_LINKS.forEach(project => {
-            const faviconUrl = getFaviconUrl(project.url, 28);
+        PROJECTS_LINKS.forEach(p => {
+            const favicon = getFaviconUrl(p.url, 28);
             const box = document.createElement('div');
             box.className = 'link-box no-dots';
             box.innerHTML = `
-                <a href="${project.url}" target="_blank" title="${project.title}">
-                    <img src="${faviconUrl}" class="favicon-img" alt="${project.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
-                    ${project.title}
+                <a href="${p.url}" target="_blank">
+                    <img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
+                    ${p.title}
                 </a>
             `;
             menu.appendChild(box);
         });
     }
 
-    function toggleProjectsMenu(event) {
-        event.stopPropagation();
+    function toggleProjectsMenu(e) {
+        e.stopPropagation();
         const menu = document.getElementById('projects-grid');
-        const isVisible = menu.style.display === 'grid';
-        hideActionMenu();
-        hideModal();
-        menu.style.display = isVisible ? 'none' : 'grid';
+        menu.style.display = menu.style.display === 'grid' ? 'none' : 'grid';
+        hideActionMenu(); hideModal();
     }
 
-    document.addEventListener('click', (e) => {
-        const menu = document.getElementById('projects-grid');
-        const btn = document.getElementById('projects-btn');
-        if (menu.style.display === 'grid' && !menu.contains(e.target) && e.target !== btn) {
-            menu.style.display = 'none';
-        }
-    });
-
-    var NAV_LINKS_KEY = 'mafior_nav_links';
-    const DEFAULT_NAV_LINKS = [
+    // === NAV LINKS (Top Bar) ===
+    const NAV_KEY = 'mafior_nav_links';
+    const DEFAULT_NAV = [
         { title: 'Social', url: 'https://social.com' },
         { title: 'News', url: 'https://news.com' },
         { title: 'Tech', url: 'https://tech.com' },
@@ -710,78 +752,57 @@
         { title: 'More', url: 'https://more.com' }
     ];
 
-    function loadNavLinks() {
-        var linksJson = localStorage.getItem(NAV_LINKS_KEY);
-        return linksJson ? JSON.parse(linksJson) : DEFAULT_NAV_LINKS;
-    }
-
-    function saveNavLinks(links) {
-        localStorage.setItem(NAV_LINKS_KEY, JSON.stringify(links));
-    }
+    function loadNav() { return JSON.parse(localStorage.getItem(NAV_KEY)) || DEFAULT_NAV; }
+    function saveNav(links) { localStorage.setItem(NAV_KEY, JSON.stringify(links)); }
 
     function renderNavLinks() {
-        var links = loadNavLinks();
-        var container = document.getElementById('nav-links-container');
+        const container = document.getElementById('nav-links-container');
         container.innerHTML = '';
-        links.forEach((link, index) => {
-            const faviconUrl = getFaviconUrl(link.url, 18);
-            var box = document.createElement('div');
+        const links = loadNav();
+        links.forEach((l, i) => {
+            const favicon = getFaviconUrl(l.url, 18);
+            const box = document.createElement('div');
             box.className = 'nav-link-box';
             box.innerHTML = `
-                <span class="dots" onclick="showActionMenu(event, ${index}, 'nav')">⋮</span>
-                <a href="${link.url}" target="_blank" title="${link.title}" class="nav-link-inner">
-                    <img src="${faviconUrl}" alt="${link.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=18';">
-                    ${link.title}
+                <span class="dots" onclick="showActionMenu(event, ${i}, 'nav')">⋮</span>
+                <a href="${l.url}" target="_blank" class="nav-link-inner">
+                    <img src="${favicon}" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=18';">
+                    ${l.title}
                 </a>
             `;
             container.appendChild(box);
         });
-        var addBox = document.createElement('div');
-        addBox.className = 'nav-link-box add-box';
-        addBox.innerHTML = '+';
-        addBox.onclick = function() { showModal(null, 'nav'); };
-        container.appendChild(addBox);
+        const add = document.createElement('div');
+        add.className = 'nav-link-box add-box';
+        add.innerHTML = '+';
+        add.onclick = () => showModal(null, 'nav');
+        container.appendChild(add);
         document.getElementById('mafia-favicon').src = getFaviconUrl('https://mafiaresell.com', 18);
     }
 
-    var LINKS_KEY = 'mafior_custom_links';
-    var LINKS_KEY_SECOND = 'mafior_custom_links_second';
+    // === MAIN & SECOND GRID LINKS ===
+    const LINKS_KEY = 'mafior_custom_links';
+    const SECOND_KEY = 'mafior_custom_links_second';
 
-    function saveLinks(links) {
-        localStorage.setItem(LINKS_KEY, JSON.stringify(links));
-    }
+    function loadLinks() { return JSON.parse(localStorage.getItem(LINKS_KEY)) || [{ title: 'Google', url: 'https://google.com' }, { title: 'Blogger', url: 'https://blogger.com' }]; }
+    function saveLinks(links) { localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
 
-    function loadLinks() {
-        var linksJson = localStorage.getItem(LINKS_KEY);
-        return linksJson ? JSON.parse(linksJson) : [
-            { title: 'Google', url: 'https://www.google.com' },
-            { title: 'Blogger', url: 'https://www.blogger.com' }
-        ];
-    }
-
-    function saveSecondLinks(links) {
-        localStorage.setItem(LINKS_KEY_SECOND, JSON.stringify(links));
-    }
-
-    function loadSecondLinks() {
-        var linksJson = localStorage.getItem(LINKS_KEY_SECOND);
-        return linksJson ? JSON.parse(linksJson) : [];
-    }
+    function loadSecond() { return JSON.parse(localStorage.getItem(SECOND_KEY)) || []; }
+    function saveSecond(links) { localStorage.setItem(SECOND_KEY, JSON.stringify(links)); }
 
     function renderLinks() {
-        var links = loadLinks();
-        var grid = document.getElementById('links-grid');
-        var addBox = grid.querySelector('.add-box');
-        grid.querySelectorAll('.link-box:not(.add-box)').forEach(box => box.remove());
-        links.forEach((link, index) => {
-            var box = document.createElement('div');
+        const grid = document.getElementById('links-grid');
+        const addBox = grid.querySelector('.add-box');
+        grid.querySelectorAll('.link-box:not(.add-box)').forEach(b => b.remove());
+        loadLinks().forEach((l, i) => {
+            const favicon = getFaviconUrl(l.url, 28);
+            const box = document.createElement('div');
             box.className = 'link-box';
-            const faviconUrl = getFaviconUrl(link.url, 28);
             box.innerHTML = `
-                <span class="dots" onclick="showActionMenu(event, ${index}, 'grid')">⋮</span>
-                <a href="${link.url}" target="_blank" title="${link.title}">
-                    <img src="${faviconUrl}" class="favicon-img" alt="${link.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
-                    ${link.title}
+                <span class="dots" onclick="showActionMenu(event, ${i}, 'grid')">⋮</span>
+                <a href="${l.url}" target="_blank">
+                    <img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
+                    ${l.title}
                 </a>
             `;
             grid.insertBefore(box, addBox);
@@ -789,96 +810,78 @@
     }
 
     function renderSecondLinks() {
-        var links = loadSecondLinks();
-        var grid = document.getElementById('second-links-grid');
-        var addBox = grid.querySelector('.add-box');
-        grid.querySelectorAll('.link-box:not(.add-box)').forEach(box => box.remove());
-        links.forEach((link, index) => {
-            var box = document.createElement('div');
+        const grid = document.getElementById('second-links-grid');
+        const addBox = grid.querySelector('.add-box');
+        grid.querySelectorAll('.link-box:not(.add-box)').forEach(b => b.remove());
+        loadSecond().forEach((l, i) => {
+            const favicon = getFaviconUrl(l.url, 28);
+            const box = document.createElement('div');
             box.className = 'link-box';
-            const faviconUrl = getFaviconUrl(link.url, 28);
             box.innerHTML = `
-                <span class="dots" onclick="showActionMenu(event, ${index}, 'second-grid')">⋮</span>
-                <a href="${link.url}" target="_blank" title="${link.title}">
-                    <img src="${faviconUrl}" class="favicon-img" alt="${link.title} icon" onerror="this.onerror=null;this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
-                    ${link.title}
+                <span class="dots" onclick="showActionMenu(event, ${i}, 'second-grid')">⋮</span>
+                <a href="${l.url}" target="_blank">
+                    <img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
+                    ${l.title}
                 </a>
             `;
             grid.insertBefore(box, addBox);
         });
     }
 
+    // === MODAL & SAVE ===
     function showModal(index = null, type = 'grid') {
-        var modal = document.getElementById('link-modal');
-        var titleInput = document.getElementById('link-title');
-        var urlInput = document.getElementById('link-url');
+        const modal = document.getElementById('link-modal');
+        const title = document.getElementById('link-title');
+        const url = document.getElementById('link-url');
         currentLinkIndex = index;
-        modal.setAttribute('data-link-type', type);
-        document.getElementById('modal-title').textContent = (index !== null ? 'Edit ' : 'Add New ') + (type === 'nav' ? 'Header Link' : type === 'second-grid' ? 'More Quick Link' : 'Quick Link');
+        modal.setAttribute('data-type', type);
+        document.getElementById('modal-title').textContent = (index === null ? 'Add' : 'Edit') + ' ' + (type === 'nav' ? 'Header' : type === 'second-grid' ? 'More' : 'Quick') + ' Link';
         if (index !== null) {
-            var links = type === 'nav' ? loadNavLinks() : type === 'second-grid' ? loadSecondLinks() : loadLinks();
-            var link = links[index];
-            titleInput.value = link.title;
-            urlInput.value = link.url;
+            const links = type === 'nav' ? loadNav() : type === 'second-grid' ? loadSecond() : loadLinks();
+            title.value = links[index].title;
+            url.value = links[index].url;
         } else {
-            titleInput.value = '';
-            urlInput.value = '';
+            title.value = ''; url.value = '';
         }
         modal.style.display = 'flex';
     }
 
-    function hideModal() {
-        document.getElementById('link-modal').style.display = 'none';
-    }
+    function hideModal() { document.getElementById('link-modal').style.display = 'none'; }
 
-    function saveLink(event) {
-        event.preventDefault();
-        var title = document.getElementById('link-title').value.trim();
-        var url = document.getElementById('link-url').value.trim();
-        var linkType = document.getElementById('link-modal').getAttribute('data-link-type');
-        if (url && !/^https?:\/\//i.test(url)) {
-            url = 'https://' + url;
+    function saveLink(e) {
+        e.preventDefault();
+        let title = document.getElementById('link-title').value.trim();
+        let url = document.getElementById('link-url').value.trim();
+        const type = document.getElementById('link-modal').getAttribute('data-type');
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        if (!title || !url) return false;
+
+        const link = { title, url };
+        let links;
+        if (type === 'nav') { links = loadNav(); }
+        else if (type === 'second-grid') { links = loadSecond(); }
+        else { links = loadLinks(); }
+
+        if (currentLinkIndex !== null && currentLinkIndex >= 0) {
+            links[currentLinkIndex] = link;
+        } else {
+            links.push(link);
         }
-        if (title && url) {
-            var newLink = { title: title, url: url };
-            if (linkType === 'nav') {
-                var links = loadNavLinks();
-                if (currentLinkIndex !== -1 && currentLinkIndex !== null) {
-                    links[currentLinkIndex] = newLink;
-                } else {
-                    links.push(newLink);
-                }
-                saveNavLinks(links);
-                renderNavLinks();
-            } else if (linkType === 'second-grid') {
-                var links = loadSecondLinks();
-                if (currentLinkIndex !== -1 && currentLinkIndex !== null) {
-                    links[currentLinkIndex] = newLink;
-                } else {
-                    links.push(newLink);
-                }
-                saveSecondLinks(links);
-                renderSecondLinks();
-            } else {
-                var links = loadLinks();
-                if (currentLinkIndex !== -1 && currentLinkIndex !== null) {
-                    links[currentLinkIndex] = newLink;
-                } else {
-                    links.push(newLink);
-                }
-                saveLinks(links);
-                renderLinks();
-            }
-            hideModal();
-        }
+
+        if (type === 'nav') { saveNav(links); renderNavLinks(); }
+        else if (type === 'second-grid') { saveSecond(links); renderSecondLinks(); }
+        else { saveLinks(links); renderLinks(); }
+
+        hideModal();
         return false;
     }
 
-    function showActionMenu(event, index, type = 'grid') {
-        event.preventDefault();
-        event.stopPropagation();
+    // === 3 DOTS ACTION MENU (Functional) ===
+    function showActionMenu(e, index, type) {
+        e.preventDefault();
+        e.stopPropagation();
         currentLinkIndex = index;
-        var menu = document.getElementById('action-menu');
+        const menu = document.getElementById('action-menu');
         menu.innerHTML = type === 'nav' ? `
             <button onclick="addLinkFromMenu()">Add Link</button>
             <button onclick="editLinkFromMenu()">Edit Link</button>
@@ -890,92 +893,124 @@
             <button onclick="deleteLinkFromMenu()">Remove Link</button>
         `;
         menu.style.display = 'block';
-        var rect = event.target.getBoundingClientRect();
-        var menuWidth = menu.offsetWidth;
-        var menuHeight = menu.offsetHeight;
-        var windowWidth = window.innerWidth;
-        var windowHeight = window.innerHeight;
-        var left = rect.right - menuWidth;
-        var top = rect.bottom + 5;
+        menu.setAttribute('data-type', type);
+        const rect = e.target.getBoundingClientRect();
+        let left = rect.right - menu.offsetWidth;
+        let top = rect.bottom + 5;
         if (left < 0) left = rect.left;
-        if (top + menuHeight > windowHeight) top = rect.top - menuHeight - 5;
+        if (top + menu.offsetHeight > window.innerHeight) top = rect.top - menu.offsetHeight - 5;
         menu.style.left = left + 'px';
         menu.style.top = top + 'px';
-        menu.setAttribute('data-link-type', type);
-        menu.focus();
     }
 
-    function hideActionMenu() {
-        document.getElementById('action-menu').style.display = 'none';
-    }
+    function hideActionMenu() { document.getElementById('action-menu').style.display = 'none'; }
 
-    function addLinkFromMenu() {
-        var type = document.getElementById('action-menu').getAttribute('data-link-type');
-        hideActionMenu();
-        showModal(null, type);
-    }
-
-    function editLinkFromMenu() {
-        var type = document.getElementById('action-menu').getAttribute('data-link-type');
-        hideActionMenu();
-        showModal(currentLinkIndex, type);
-    }
-
+    function addLinkFromMenu() { showModal(null, document.getElementById('action-menu').getAttribute('data-type')); hideActionMenu(); }
+    function editLinkFromMenu() { showModal(currentLinkIndex, document.getElementById('action-menu').getAttribute('data-type')); hideActionMenu(); }
     function deleteLinkFromMenu() {
+        if (!confirm('Remove this link?')) return;
+        const type = document.getElementById('action-menu').getAttribute('data-type');
+        let links;
+        if (type === 'nav') { links = loadNav(); links.splice(currentLinkIndex, 1); saveNav(links); renderNavLinks(); }
+        else if (type === 'second-grid') { links = loadSecond(); links.splice(currentLinkIndex, 1); saveSecond(links); renderSecondLinks(); }
+        else { links = loadLinks(); links.splice(currentLinkIndex, 1); saveLinks(links); renderLinks(); }
         hideActionMenu();
-        if (confirm('Are you sure you want to remove this link?')) {
-            var type = document.getElementById('action-menu').getAttribute('data-link-type');
-            if (type === 'nav') {
-                var links = loadNavLinks();
-                links.splice(currentLinkIndex, 1);
-                saveNavLinks(links);
-                renderNavLinks();
-            } else if (type === 'second-grid') {
-                var links = loadSecondLinks();
-                links.splice(currentLinkIndex, 1);
-                saveSecondLinks(links);
-                renderSecondLinks();
-            } else {
-                var links = loadLinks();
-                links.splice(currentLinkIndex, 1);
-                saveLinks(links);
-                renderLinks();
-            }
-        }
+    }
+    function saveLinksToStorage() {
+        const type = document.getElementById('action-menu').getAttribute('data-type');
+        if (type === 'nav') { saveNav(loadNav()); alert('Header links saved!'); }
+        hideActionMenu();
     }
 
-    function saveLinksToStorage() {
-        var type = document.getElementById('action-menu').getAttribute('data-link-type');
-        hideActionMenu();
-        if (type === 'nav') {
-            var links = loadNavLinks();
-            saveNavLinks(links);
-            alert('Header links saved successfully!');
-        } else if (type === 'second-grid') {
-            var links = loadSecondLinks();
-            saveSecondLinks(links);
-            alert('More Quick Links saved successfully!');
-        } else {
-            var links = loadLinks();
-            saveLinks(links);
-            alert('Quick Links saved successfully!');
-        }
-    }
+    // === AUTH MENU TOGGLE (3 DOTS TOP RIGHT) ===
+    document.getElementById('authMenuToggle').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const menu = document.getElementById('authMenu');
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    });
 
     document.addEventListener('click', (e) => {
-        const menu = document.getElementById('action-menu');
-        if (menu.style.display === 'block' && !menu.contains(e.target) && !e.target.classList.contains('dots')) {
+        const menu = document.getElementById('authMenu');
+        const toggle = document.getElementById('authMenuToggle');
+        if (menu.style.display === 'block' && !menu.contains(e.target) && !toggle.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+        if (document.getElementById('projects-grid').style.display === 'grid' && !document.getElementById('projects-grid').contains(e.target) && e.target !== document.getElementById('projects-btn')) {
+            document.getElementById('projects-grid').style.display = 'none';
+        }
+        if (document.getElementById('action-menu').style.display === 'block' && !document.getElementById('action-menu').contains(e.target) && !e.target.classList.contains('dots')) {
             hideActionMenu();
         }
     });
 
-    window.onload = function() {
+    // === AUTH FUNCTIONS (Google, X, Email, Logout) ===
+    async function signInWithGoogle() {
+        await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: window.location.href }
+        });
+    }
+
+    async function signInWithTwitter() {
+        await supabase.auth.signInWithOAuth({
+            provider: 'twitter',
+            options: { redirectTo: window.location.href }
+        });
+    }
+
+    async function signInWithEmail() {
+        const email = document.getElementById('emailInput').value.trim();
+        const password = document.getElementById('passwordInput').value.trim();
+        if (!email || !password) {
+            document.getElementById('authStatus').textContent = 'Enter email & password';
+            return;
+        }
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        document.getElementById('authStatus').textContent = error ? error.message : 'Signed in!';
+    }
+
+    async function signOut() {
+        await supabase.auth.signOut();
+        document.getElementById('authMenu').style.display = 'none';
+    }
+
+    // === AUTH STATE LISTENER ===
+    supabase.auth.onAuthStateChange((event, session) => {
+        const status = document.getElementById('authStatus');
+        const toggle = document.getElementById('authMenuToggle');
+        if (session?.user) {
+            const name = session.user.user_metadata?.full_name || session.user.email.split('@')[0] || 'User';
+            status.innerHTML = `<div style="margin-bottom:8px;"><strong>Welcome, ${name}</strong></div>
+                                <button onclick="signOut()" style="width:100%;background:#ff4444;color:white;padding:6px;border:none;border-radius:5px;font-size:11px;cursor:pointer;">Sign Out</button>`;
+            toggle.textContent = '✓';
+        } else {
+            status.innerHTML = '';
+            toggle.textContent = '⋯';
+        }
+    });
+
+    // === CLEAR CACHE / HISTORY ===
+    function clearCache() {
+        if (window.parent !== window) {
+            window.parent.postMessage({ action: 'clearCache' }, '*');
+        }
+        alert('Cache cleared!');
+    }
+
+    function clearHistory() {
+        if (window.parent !== window) {
+            window.parent.postMessage({ action: 'clearHistory' }, '*');
+        }
+        alert('History cleared!');
+    }
+
+    // === ON LOAD ===
+    window.onload = () => {
         renderLinks();
         renderSecondLinks();
         renderNavLinks();
-        renderProjectsLinks();
+        render_projectsLinks();
     };
   </script>
-
 </body>
 </html>
