@@ -373,6 +373,112 @@
       cursor: pointer;
     }
     .action-menu button:hover { background-color: #f0f0f0; color: #D81B60; }
+
+    /* === NEW: Clean Auth & Profile === */
+    #authToggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #D81B60;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.2s;
+    }
+    #authToggle:hover { transform: scale(1.1); }
+    #authToggle img { width: 36px; height:  36px; border-radius: 50%; object-fit: cover; }
+
+    #authMenu {
+      display: none;
+      position: fixed;
+      top: 60px;
+      right: 10px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 260px;
+      border: 1px solid #ffe6f0;
+    }
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 12px;
+    }
+    .profile-header img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #D81B60;
+    }
+    .profile-info h4 {
+      margin: 0;
+      font-size: 15px;
+      color: #333;
+    }
+    .profile-info p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: #777;
+    }
+    .auth-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .auth-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .auth-btn.google { background: #4285F4; color: white; }
+    .auth-btn.twitter { background: #000; color: white; }
+    .auth-btn.magic { background: #D81B60; color: white; }
+    .auth-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .magic-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .auth-status {
+      font-size: 11px;
+      text-align: center;
+      margin-top: 8px;
+      color: #D81B60;
+      min-height: 16px;
+    }
+    .signout-btn {
+      background: #ff4444;
+      color: white;
+      margin-top: 12px;
+    }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
         body { padding-top: 140px; }
@@ -407,6 +513,10 @@
         .modal-content input { font-size: 13px; padding: 6px; }
         .modal-buttons button { font-size: 13px; padding: 6px 12px; }
         .action-menu button { font-size: 12px; padding: 6px 12px; }
+        #authMenu { width: 220px; right: 5px; top: 55px; }
+        .profile-header img { width: 40px; height: 40px; }
+        .profile-info h4 { font-size: 14px; }
+        .profile-info p { font-size: 11px; }
     }
     @media (max-width: 480px) {
         .main-heading { font-size: 32px; }
@@ -425,33 +535,13 @@
   </style>
 </head>
 <body>
-  <!-- 3 DOTS MENU (TOP-RIGHT) -->
-  <div id="authMenuToggle" style="position:fixed;top:10px;right:10px;background:#fff;padding:6px 10px;border-radius:50%;z-index:9999;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;">
-    ⋯
-  </div>
 
-  <!-- AUTH MENU (Magic Link + Google + X) -->
-  <div id="authMenu" style="display:none;position:fixed;top:50px;right:10px;background:#fff;padding:12px;border-radius:8px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.15);width:200px;">
-    <!-- Google -->
-    <div style="margin-bottom:8px;">
-      <button onclick="signInWithGoogle()" style="width:100%;background:#4285F4;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-        Sign in with Google
-      </button>
-    </div>
-    <!-- X (Twitter) -->
-    <div style="margin-bottom:8px;">
-      <button onclick="signInWithTwitter()" style="width:100%;background:#000;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-        Sign in with X
-      </button>
-    </div>
-    <!-- Magic Link -->
-    <div style="margin-bottom:8px;">
-      <input type="email" id="magicEmail" placeholder="Your Email" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:5px;font-size:12px;margin-bottom:4px;">
-      <button onclick="sendMagicLink()" style="width:100%;background:#D81B60;color:white;padding:8px;border:none;border-radius:5px;font-size:12px;cursor:pointer;">
-        Continue with Email
-      </button>
-    </div>
-    <div id="authStatus" style="font-size:11px;color:#666;text-align:center;margin-top:8px;"></div>
+  <!-- AUTH TOGGLE (Top Right) -->
+  <div id="authToggle">...</div>
+
+  <!-- CLEAN AUTH MENU -->
+  <div id="authMenu">
+    <!-- Will be populated by JS -->
   </div>
 
   <div class="top-nav">
@@ -665,11 +755,11 @@
     </div>
   </div>
 
-  <!-- Action Menu (for 3 dots on links) -->
+  <!-- Action Menu -->
   <div class="action-menu" id="action-menu" style="display:none;"></div>
 
   <script>
-    // === SUPABASE INITIALIZATION ===
+    // === SUPABASE ===
     const supabase = window.supabase.createClient(
       'https://gmexnhcawqfndbtsqauj.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZXhuaGNhd3FmbmRidHNxYXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0NDczODAsImV4cCI6MjA2OTAyMzM4MH0.3Qsx0-pLF8gGlXE5Bnf_mFGlcNuUOVYhWZdDsupD3TM'
@@ -684,7 +774,7 @@
         return `https://s2.googleusercontent.com/s2/favicons?domain=${domainOnly}&sz=${size}`;
     }
 
-    // === SEARCH FUNCTIONALITY ===
+    // === SEARCH ===
     function performSearch(engine, form) {
       const query = form.querySelector('input').value.trim();
       if (!query) return false;
@@ -700,7 +790,7 @@
       return false;
     }
 
-    // === PROJECTS DATA ===
+    // === PROJECTS ===
     const PROJECTS_LINKS = [
         { title: 'Mafia Resell', url: 'https://mafiaresell.com' },
         { title: 'Tech Praa', url: 'https://techpraa.blogspot.com' },
@@ -716,12 +806,7 @@
             const favicon = getFaviconUrl(p.url, 28);
             const box = document.createElement('div');
             box.className = 'link-box no-dots';
-            box.innerHTML = `
-                <a href="${p.url}" target="_blank">
-                    <img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
-                    ${p.title}
-                </a>
-            `;
+            box.innerHTML = `<a href="${p.url}" target="_blank"><img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">${p.title}</a>`;
             menu.appendChild(box);
         });
     }
@@ -733,8 +818,11 @@
         hideActionMenu(); hideModal();
     }
 
-    // === NAV LINKS ===
+    // === NAV, GRID, SECOND GRID (unchanged) ===
     const NAV_KEY = 'mafior_nav_links';
+    const LINKS_KEY = 'mafior_custom_links';
+    const SECOND_KEY = 'mafior_custom_links_second';
+
     const DEFAULT_NAV = [
         { title: 'Social', url: 'https://social.com' },
         { title: 'News', url: 'https://news.com' },
@@ -745,6 +833,10 @@
 
     function loadNav() { return JSON.parse(localStorage.getItem(NAV_KEY)) || DEFAULT_NAV; }
     function saveNav(links) { localStorage.setItem(NAV_KEY, JSON.stringify(links)); }
+    function loadLinks() { return JSON.parse(localStorage.getItem(LINKS_KEY)) || [{ title: 'Google', url: 'https://google.com' }, { title: 'Blogger', url: 'https://blogger.com' }]; }
+    function saveLinks(links) { localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
+    function loadSecond() { return JSON.parse(localStorage.getItem(SECOND_KEY)) || []; }
+    function saveSecond(links) { localStorage.setItem(SECOND_KEY, JSON.stringify(links)); }
 
     function renderNavLinks() {
         const container = document.getElementById('nav-links-container');
@@ -754,13 +846,7 @@
             const favicon = getFaviconUrl(l.url, 18);
             const box = document.createElement('div');
             box.className = 'nav-link-box';
-            box.innerHTML = `
-                <span class="dots" onclick="showActionMenu(event, ${i}, 'nav')">⋮</span>
-                <a href="${l.url}" target="_blank" class="nav-link-inner">
-                    <img src="${favicon}" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=18';">
-                    ${l.title}
-                </a>
-            `;
+            box.innerHTML = `<span class="dots" onclick="showActionMenu(event, ${i}, 'nav')">...</span><a href="${l.url}" target="_blank" class="nav-link-inner"><img src="${favicon}" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=18';">${l.title}</a>`;
             container.appendChild(box);
         });
         const add = document.createElement('div');
@@ -771,16 +857,6 @@
         document.getElementById('mafia-favicon').src = getFaviconUrl('https://mafiaresell.com', 18);
     }
 
-    // === MAIN & SECOND GRID LINKS ===
-    const LINKS_KEY = 'mafior_custom_links';
-    const SECOND_KEY = 'mafior_custom_links_second';
-
-    function loadLinks() { return JSON.parse(localStorage.getItem(LINKS_KEY)) || [{ title: 'Google', url: 'https://google.com' }, { title: 'Blogger', url: 'https://blogger.com' }]; }
-    function saveLinks(links) { localStorage.setItem(LINKS_KEY, JSON.stringify(links)); }
-
-    function loadSecond() { return JSON.parse(localStorage.getItem(SECOND_KEY)) || []; }
-    function saveSecond(links) { localStorage.setItem(SECOND_KEY, JSON.stringify(links)); }
-
     function renderLinks() {
         const grid = document.getElementById('links-grid');
         const addBox = grid.querySelector('.add-box');
@@ -789,13 +865,7 @@
             const favicon = getFaviconUrl(l.url, 28);
             const box = document.createElement('div');
             box.className = 'link-box';
-            box.innerHTML = `
-                <span class="dots" onclick="showActionMenu(event, ${i}, 'grid')">⋮</span>
-                <a href="${l.url}" target="_blank">
-                    <img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
-                    ${l.title}
-                </a>
-            `;
+            box.innerHTML = `<span class="dots" onclick="showActionMenu(event, ${i}, 'grid')">...</span><a href="${l.url}" target="_blank"><img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">${l.title}</a>`;
             grid.insertBefore(box, addBox);
         });
     }
@@ -808,13 +878,7 @@
             const favicon = getFaviconUrl(l.url, 28);
             const box = document.createElement('div');
             box.className = 'link-box';
-            box.innerHTML = `
-                <span class="dots" onclick="showActionMenu(event, ${i}, 'second-grid')">⋮</span>
-                <a href="${l.url}" target="_blank">
-                    <img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">
-                    ${l.title}
-                </a>
-            `;
+            box.innerHTML = `<span class="dots" onclick="showActionMenu(event, ${i}, 'second-grid')">...</span><a href="${l.url}" target="_blank"><img src="${favicon}" class="favicon-img" alt="" onerror="this.src='//www.google.com/s2/favicons?domain=default&sz=28';">${l.title}</a>`;
             grid.insertBefore(box, addBox);
         });
     }
@@ -867,7 +931,7 @@
         return false;
     }
 
-    // === 3 DOTS ACTION MENU ===
+    // === ACTION MENU ===
     function showActionMenu(e, index, type) {
         e.preventDefault();
         e.stopPropagation();
@@ -913,99 +977,240 @@
         hideActionMenu();
     }
 
-    // === AUTH MENU TOGGLE ===
-    document.getElementById('authMenuToggle').addEventListener('click', (e) => {
-        e.stopPropagation();
-        const menu = document.getElementById('authMenu');
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    // === AUTH: Clean UI + Profile + Full Sync ===
+    const authToggle = document.getElementById('authToggle');
+    const authMenu = document.getElementById('authMenu');
+    const MAGIC_EMAIL_KEY = 'mafior_magic_email';
+
+    // Load saved email for Magic Link
+    function getSavedEmail() {
+      return localStorage.getItem(MAGIC_EMAIL_KEY) || '';
+    }
+
+    function saveEmail(email) {
+      localStorage.setItem(MAGIC_EMAIL_KEY, email);
+    }
+
+    function clearSavedEmail() {
+      localStorage.removeItem(MAGIC_EMAIL_KEY);
+    }
+
+    function renderAuthMenu(session = null) {
+      if (session?.user) {
+        const user = session.user;
+        const name = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
+        const email = user.email;
+        const avatar = user.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=D81B60&color=fff&size=128`;
+
+        authToggle.innerHTML = `<img src="${avatar}" alt="Profile">`;
+        authMenu.innerHTML = `
+          <div class="profile-header">
+            <img src="${avatar}" alt="Profile">
+            <div class="profile-info">
+              <h4>${name}</h4>
+              <p>${email}</p>
+            </div>
+          </div>
+          <button class="auth-btn signout-btn" onclick="signOut()">Sign Out</button>
+        `;
+      } else {
+        const savedEmail = getSavedEmail();
+        authToggle.innerHTML = '...';
+        if (savedEmail) {
+          // Auto-send magic link on load if email saved
+          authMenu.innerHTML = `
+            <div class="auth-status" id="authStatus">Sending magic link to <strong>${savedEmail}</strong>...</div>
+          `;
+          sendMagicLinkAuto(savedEmail);
+        } else {
+          authMenu.innerHTML = `
+            <div class="auth-buttons">
+              <button class="auth-btn google" onclick="signInWithGoogle()">
+                Continue with Google
+              </button>
+              <button class="auth-btn twitter" onclick="signInWithTwitter()">
+                Continue with X
+              </button>
+              <input type="email" id="magicEmail" class="magic-input" placeholder="your@email.com" value="">
+              <button class="auth-btn magic" onclick="sendMagicLink()">
+                Send Magic Link
+              </button>
+            </div>
+            <div class="auth-status" id="authStatus"></div>
+          `;
+        }
+      }
+    }
+
+    authToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      authMenu.style.display = authMenu.style.display === 'block' ? 'none' : 'block';
+      if (!supabase.auth.getSession()) {
+        const savedEmail = getSavedEmail();
+        if (!savedEmail) {
+          document.getElementById('magicEmail')?.focus();
+        }
+      }
     });
 
     document.addEventListener('click', (e) => {
-        const menu = document.getElementById('authMenu');
-        const toggle = document.getElementById('authMenuToggle');
-        if (menu.style.display === 'block' && !menu.contains(e.target) && !toggle.contains(e.target)) {
-            menu.style.display = 'none';
-        }
-        if (document.getElementById('projects-grid').style.display === 'grid' && !document.getElementById('projects-grid').contains(e.target) && e.target !== document.getElementById('projects-btn')) {
-            document.getElementById('projects-grid').style.display = 'none';
-        }
-        if (document.getElementById('action-menu').style.display === 'block' && !document.getElementById('action-menu').contains(e.target) && !e.target.classList.contains('dots')) {
-            hideActionMenu();
-        }
+      if (authMenu.style.display === 'block' && !authMenu.contains(e.target) && e.target !== authToggle) {
+        authMenu.style.display = 'none';
+      }
+      if (document.getElementById('projects-grid').style.display === 'grid' && !document.getElementById('projects-grid').contains(e.target) && e.target !== document.getElementById('projects-btn')) {
+        document.getElementById('projects-grid').style.display = 'none';
+      }
+      if (document.getElementById('action-menu').style.display === 'block' && !document.getElementById('action-menu').contains(e.target) && !e.target.classList.contains('dots')) {
+        hideActionMenu();
+      }
     });
 
     // === AUTH FUNCTIONS ===
     async function signInWithGoogle() {
-        await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: { redirectTo: window.location.href }
-        });
+      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
     }
 
     async function signInWithTwitter() {
-        await supabase.auth.signInWithOAuth({
-            provider: 'twitter',
-            options: { redirectTo: window.location.href }
-        });
+      await supabase.auth.signInWithOAuth({ provider: 'twitter', options: { redirectTo: window.location.href } });
     }
 
     async function sendMagicLink() {
-      const email = document.getElementById('magicEmail').value.trim();
-      if (!email) {
-        document.getElementById('authStatus').textContent = 'Enter your email';
-        return;
-      }
+      const emailInput = document.getElementById('magicEmail');
+      const email = emailInput.value.trim();
+      const status = document.getElementById('authStatus');
+      if (!email) { status.textContent = 'Enter email'; return; }
 
+      saveEmail(email); // Save email for next time
+      status.innerHTML = `Sending to <strong>${email}</strong>...`;
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: {
-          emailRedirectTo: 'https://mafior.mafiaresell.com'
-        }
+        options: { emailRedirectTo: window.location.href } // Redirect back to same page
       });
 
       if (error) {
-        document.getElementById('authStatus').textContent = error.message;
+        status.textContent = error.message;
       } else {
-        document.getElementById('authStatus').innerHTML = 
-          `Check <strong>${email}</strong> for magic link! (Check spam too)`;
+        status.innerHTML = `Check <strong>${email}</strong> for magic link!`;
+      }
+    }
+
+    async function sendMagicLinkAuto(email) {
+      const status = document.getElementById('authStatus');
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: window.location.href }
+      });
+
+      if (error) {
+        status.textContent = 'Auto-login failed. Try again.';
+        clearSavedEmail();
+        renderAuthMenu(); // Show input again
+      } else {
+        status.innerHTML = `Auto-sent to <strong>${email}</strong>! Check email.`;
       }
     }
 
     async function signOut() {
+      clearSavedEmail(); // Clear saved email on logout
       await supabase.auth.signOut();
-      document.getElementById('authMenu').style.display = 'none';
+      authMenu.style.display = 'none';
+      // Clear all local data on logout
+      localStorage.removeItem(NAV_KEY);
+      localStorage.removeItem(LINKS_KEY);
+      localStorage.removeItem(SECOND_KEY);
+      renderNavLinks();
+      renderLinks();
+      renderSecondLinks();
     }
 
-    // AUTH STATE LISTENER
-    supabase.auth.onAuthStateChange((event, session) => {
-      const status = document.getElementById('authStatus');
-      const toggle = document.getElementById('authMenuToggle');
-      const menu = document.getElementById('authMenu');
-      if (session?.user) {
-        const name = session.user.user_metadata?.full_name || 
-                     session.user.email?.split('@')[0] || 'User';
-        status.innerHTML = `
-          <div style="margin-bottom:8px;"><strong>Welcome, ${name}!</strong></div>
-          <button onclick="signOut()" style="width:100%;background:#ff4444;color:white;padding:6px;border:none;border-radius:5px;font-size:11px;cursor:pointer;">
-            Sign Out
-          </button>`;
-        toggle.textContent = '✓';
-        menu.style.display = 'block';
-      } else {
-        status.innerHTML = '';
-        toggle.textContent = '⋯';
-        menu.style.display = 'none';
+    // === AUTH STATE CHANGE: FULL SYNC ===
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      renderAuthMenu(session);
+
+      if (event === 'SIGNED_IN' && session?.user) {
+        // Sync localStorage → Supabase
+        const { data: existing, error } = await supabase
+          .from('user_data')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (!existing) {
+          await supabase.from('user_data').insert({
+            user_id: session.user.id,
+            nav_links: loadNav(),
+            quick_links: loadLinks(),
+            more_links: loadSecond()
+          });
+        } else {
+          // Merge: use Supabase as source of truth
+          saveNav(existing.nav_links || DEFAULT_NAV);
+          saveLinks(existing.quick_links || []);
+          saveSecond(existing.more_links || []);
+          renderNavLinks();
+          renderLinks();
+          renderSecondLinks();
+        }
+      }
+
+      if (event === 'SIGNED_OUT') {
+        // Optionally reload defaults or keep local
+        renderNavLinks();
+        renderLinks();
+        renderSecondLinks();
       }
     });
 
+    // === SAVE TO SUPABASE ON CHANGE ===
+    async function saveToSupabase() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from('user_data').upsert({
+        user_id: user.id,
+        nav_links: loadNav(),
+        quick_links: loadLinks(),
+        more_links: loadSecond()
+      });
+    }
+
+    // Override save functions to sync with Supabase
+    const originalSaveNav = saveNav;
+    saveNav = (links) => { originalSaveNav(links); saveToSupabase(); };
+
+    const originalSaveLinks = saveLinks;
+    saveLinks = (links) => { originalSaveLinks(links); saveToSupabase(); };
+
+    const originalSaveSecond = saveSecond;
+    saveSecond = (links) => { originalSaveSecond(links); saveToSupabase(); };
+
     // === ON LOAD ===
-    window.onload = () => {
-        renderLinks();
-        renderSecondLinks();
-        renderNavLinks();
-        render_projectsLinks();
+    window.onload = async () => {
+      renderLinks();
+      renderSecondLinks();
+      renderNavLinks();
+      render_projectsLinks();
+      renderAuthMenu();
+
+      // Initial sync if logged in
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data } = await supabase
+          .from('user_data')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+
+        if (data) {
+          saveNav(data.nav_links || DEFAULT_NAV);
+          saveLinks(data.quick_links || []);
+          saveSecond(data.more_links || []);
+          renderNavLinks();
+          renderLinks();
+          renderSecondLinks();
+        }
+      }
     };
   </script>
 </body>
 </html>
-
