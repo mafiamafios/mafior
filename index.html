@@ -1024,18 +1024,12 @@
           sendMagicLinkAuto(savedEmail);
         } else {
           authMenu.innerHTML = `
-            <div class="auth-buttons">
-              <button class="auth-btn google" onclick="signInWithGoogle()">
-                Continue with Google
-              </button>
-              <button class="auth-btn twitter" onclick="signInWithTwitter()">
-                Continue with X
-              </button>
-              <input type="email" id="magicEmail" class="magic-input" placeholder="your@email.com" value="">
-              <button class="auth-btn magic" onclick="sendMagicLink()">
-                Send Magic Link
-              </button>
-            </div>
+          <div class="auth-buttons">
+  <input type="email" id="magicEmail" class="magic-input" placeholder="Enter your email" value="">
+  <button class="auth-btn magic" onclick="sendMagicLink()">
+    Send Email
+  </button>
+</div>
             <div class="auth-status" id="authStatus"></div>
           `;
         }
@@ -1066,33 +1060,29 @@
     });
 
     // === AUTH FUNCTIONS ===
-    async function signInWithGoogle() {
-      await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
-    }
-
-    async function signInWithTwitter() {
-      await supabase.auth.signInWithOAuth({ provider: 'twitter', options: { redirectTo: window.location.href } });
-    }
-
+    
     async function sendMagicLink() {
-      const emailInput = document.getElementById('magicEmail');
-      const email = emailInput.value.trim();
-      const status = document.getElementById('authStatus');
-      if (!email) { status.textContent = 'Enter email'; return; }
+  const emailInput = document.getElementById('magicEmail');
+  const email = emailInput.value.trim();
+  const status = document.getElementById('authStatus');
+  if (!email) { status.textContent = 'Enter email'; return; }
+  saveEmail(email);
+  status.innerHTML = `Sending to <strong>${email}</strong>...`;
 
-      saveEmail(email); // Save email for next time
-      status.innerHTML = `Sending to <strong>${email}</strong>...`;
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: window.location.href } // Redirect back to same page
-      });
-
-      if (error) {
-        status.textContent = error.message;
-      } else {
-        status.innerHTML = `Check <strong>${email}</strong> for magic link!`;
-      }
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      // No redirect! Mobile pe sirf confirm
+      emailRedirectTo: `${window.location.origin}/confirm.html`
     }
+  });
+
+  if (error) {
+    status.textContent = error.message;
+  } else {
+    status.innerHTML = `Check <strong>${email}</strong> (mobile) → Click link to confirm.`;
+  }
+}
 
     async function sendMagicLinkAuto(email) {
       const status = document.getElementById('authStatus');
@@ -1105,6 +1095,16 @@
         status.textContent = 'Auto-login failed. Try again.';
         clearSavedEmail();
         renderAuthMenu(); // Show input again
+        // Auto-check session every 3 sec (PC auto login)
+setInterval(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    renderAuthMenu(session);
+    // Optional: Show toast
+    const status = document.getElementById('authStatus');
+    if (status) status.innerHTML = `Auto logged in!`;
+  }
+}, 3000);
       } else {
         status.innerHTML = `Auto-sent to <strong>${email}</strong>! Check email.`;
       }
