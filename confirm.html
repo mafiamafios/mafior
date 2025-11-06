@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Confirming...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 50px; background: #ffe6f0; color: #D81B60; }
+    .msg { font-size: 18px; margin: 20px; }
+    .close { margin-top: 30px; font-size: 14px; color: #777; }
+  </style>
+</head>
+<body>
+  <h2>Confirming your account...</h2>
+  <p class="msg" id="msg">Please wait...</p>
+  <p class="close">You can close this tab.</p>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://gmexnhcawqfndbtsqauj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZXhuaGNhd3FmbmRidHNxYXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0NDczODAsImV4cCI6MjA2OTAyMzM4MH0.3Qsx0-pLF8gGlXE5Bnf_mFGlcNuUOVYhWZdDsupD3TM'
+    );
+
+    (async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      const msg = document.getElementById('msg');
+      if (session) {
+        msg.innerHTML = `<strong style="color:green;">Confirmed!</strong><br>You are now signed in on your PC.`;
+      } else if (error) {
+        msg.innerHTML = `<strong style="color:red;">Error:</strong> ${error.message}`;
+      } else {
+        msg.textContent = 'No session found. Try again.';
+      }
+    })();
+  </script>
+</body>
+</html>
